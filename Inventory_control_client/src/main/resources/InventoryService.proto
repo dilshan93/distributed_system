@@ -1,0 +1,41 @@
+syntax = "proto3";
+option java_multiple_files = true;
+package ds.tutorial.communication.grpc.generated;
+
+message CreateProductRequest {
+    string productId = 1;
+    string productName = 2;
+    int32 count = 3;
+}
+
+message CreateProductResponse {
+    string status = 1;
+    string message = 2;
+}
+
+message ProcessOrderRequest {
+    string orderNumber = 1;
+    string productId = 2;
+    int32 count = 3;
+}
+
+message ProcessOrderResponse {
+    string status = 1;
+    string message = 2;
+}
+
+message UpdateInventoryRequest {
+    string productId = 1;
+    int32 count = 2;
+}
+
+message UpdateInventoryResponse {
+    string status = 1;
+    string message = 2;
+}
+
+service InventoryService {
+    rpc createItem(CreateProductRequest) returns (CreateProductResponse);
+    rpc processOrder(ProcessOrderRequest) returns (ProcessOrderResponse);
+    rpc updateInventory(UpdateInventoryRequest) returns (UpdateInventoryResponse);
+}
