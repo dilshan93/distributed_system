@@ -65,7 +65,7 @@ public class InventoryContorolService {
 
     public synchronized Map<String, String> updateInventory(Product product) {
         MongoDatabase database = DbConfig.getDatabase();
-        MongoCollection<Document> collection = database.getCollection("items");
+        MongoCollection<Document> collection = database.getCollection("products");
         Document query = new Document();
         query.put("productId", product.getProductId());
         Document dbproduct = collection.find(query).first();

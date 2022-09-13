@@ -126,7 +126,7 @@ public class DistributedLock implements Watcher {
         }
         if (Event.EventType.NodeDeleted.equals(type)) {
             if (watchedNode != null && eventReceivedFlag != null && event.getPath().equals(watchedNode)) {
-                System.out.println("NodeDelete eventreceived. Trying to get the lock..");
+                System.out.println("Node Delete event received. Trying to get the lock..");
                 eventReceivedFlag.countDown();
             }
         }

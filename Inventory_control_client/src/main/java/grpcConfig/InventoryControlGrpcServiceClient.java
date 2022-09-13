@@ -29,7 +29,7 @@ public class InventoryControlGrpcServiceClient {
     }
 
     public void createProduct(String productName, String productId, Integer count) throws InterruptedException {
-        System.out.println("Request sent to Create Item: " + productId);
+        System.out.println("Request sent to Create Product: " + productId);
 
         CreateProductRequest request = CreateProductRequest
                 .newBuilder()
@@ -40,7 +40,7 @@ public class InventoryControlGrpcServiceClient {
 
         CreateProductResponse response = inventoryServiceBlockingStub.createItem(request);
 
-        System.out.println("Response received to Create Item: [" + response.getStatus() + "] " + response.getMessage());
+        System.out.println("Response received to Create Product: [" + response.getStatus() + "] " + response.getMessage());
         System.out.println("");
         Thread.sleep(1000);
     }

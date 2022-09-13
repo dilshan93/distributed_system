@@ -4,6 +4,7 @@ package grpcConfig;
 import DTOs.Order;
 import DTOs.Product;
 import Service.InventoryContorolService;
+import Service.InventoryControlServiceDistribute;
 import ds.tutorial.communication.grpc.generated.*;
 
 import java.util.Map;
@@ -41,7 +42,7 @@ public class InventoryControlGrpcServiceImpl extends InventoryServiceGrpc.Invent
         order.setItemId(request.getProductId());
         order.setCount(request.getCount());
 
-        InventoryContorolService service = new InventoryContorolService();
+        InventoryControlServiceDistribute service = new InventoryControlServiceDistribute();
         Map<String, String> serviceResponse = service.processOrder(order);
 
         ProcessOrderResponse response = ProcessOrderResponse
@@ -62,7 +63,7 @@ public class InventoryControlGrpcServiceImpl extends InventoryServiceGrpc.Invent
         product.setProductId(request.getProductId());
         product.setCount(request.getCount());
 
-        InventoryContorolService service = new InventoryContorolService();
+        InventoryControlServiceDistribute service = new InventoryControlServiceDistribute();
         Map<String, String> serviceResponse = service.updateInventory(product);
 
         UpdateInventoryResponse response = UpdateInventoryResponse

@@ -1,4 +1,5 @@
 import Util.DbConfig;
+import ZooKeeper.ZookeeperService;
 import ds.name.service.*;
 import grpcConfig.InventoryControlGrpcServiceImpl;
 import io.grpc.Server;
@@ -6,6 +7,8 @@ import io.grpc.ServerBuilder;
 import org.apache.zookeeper.KeeperException;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class InventoryControlServer {
@@ -14,16 +17,10 @@ public class InventoryControlServer {
 
     private DistributedLock leaderLock;
     private int serverPort;
-    private AtomicBoolean isLeader = new AtomicBoolean(false);
-    private byte[] leaderData;
-    private DistributedTx transaction;
-    private InventoryDistributedImpl inventoryDistributed;
 
     public InventoryControlServer(String host, int port) throws IOException, InterruptedException, KeeperException {
         this.serverPort = port;
         leaderLock = new DistributedLock("InventoryServerCluster", buildServerData(host, port));
-        inventoryDistributed = new InventoryDistributedImpl();
-        transaction = new DistributedTxParticipant(inventoryDistributed);
     }
 
     public void startServer() throws IOException, InterruptedException, KeeperException {
@@ -45,7 +42,7 @@ public class InventoryControlServer {
         return builder.toString();
     }
     private synchronized void setCurrentLeaderData(byte[] leaderData) {
-        this.leaderData = leaderData;
+        ZookeeperService.leaderData = leaderData;
     }
 
     private void tryToBeLeader() throws KeeperException, InterruptedException {
@@ -54,8 +51,19 @@ public class InventoryControlServer {
     }
     private void beTheLeader() {
         System.out.println("I got the leader lock. Now acting as primary");
-        isLeader.set(true);
-        transaction = new DistributedTxCoordinator(inventoryDistributed);
+        ZookeeperService.isLeader = new AtomicBoolean(true);
+    }
+
+    public List<String[]> getOthersData() throws
+            KeeperException, InterruptedException {
+        List<String[]> result = new ArrayList<>();
+        List<byte[]> othersData = leaderLock.getOthersData();
+        for (byte[] data : othersData) {
+            String[] dataStrings = new
+                    String(data).split(":");
+            result.add(dataStrings);
+        }
+        return result;
     }
 
     public static void main (String[] args) throws Exception{
@@ -67,10 +75,6 @@ public class InventoryControlServer {
 
         // Initialize Database
         DbConfig.initDB();
-
-        // Initialize Server
-        InventoryControlServer server = new InventoryControlServer("localhost", serverPort);
-        server.startServer();
 
         // Initialize ETCD
         NameServiceClient client = new NameServiceClient(NAME_SERVICE_ADDRESS);
@@ -85,6 +89,10 @@ public class InventoryControlServer {
             }
         });
         Runtime.getRuntime().addShutdownHook(printingHook);
+
+        // Initialize Server
+        InventoryControlServer server = new InventoryControlServer("localhost", serverPort);
+        server.startServer();
     }
     class LeaderCampaignThread implements Runnable {
         private byte[] currentLeaderData = null;
